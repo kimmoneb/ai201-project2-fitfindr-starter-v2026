@@ -59,24 +59,24 @@
 
 ### `search_listings`
 
-- **What it does:**
-- **Inputs:** <!-- name and type each: `max_price` (float), not "a price" -->
-- **Returns:**
-- **When it has nothing:**
+- **What it does:** Searches the listings data for items matching a description, with optional size and maximum price filters.
+- **Inputs:** `description` (str), `size` (str or None), `max_price` (float or None)
+- **Returns:** A `list[dict]` containing the matching clothing listings.
+- **When it has nothing:** Returns an empty list'[]'.
 
 ### `suggest_outfit`
 
-- **What it does:**
-- **Inputs:**
-- **Returns:**
-- **When it has nothing:**
+- **What it does:** Suggests one or two outfits using the thrifted item the user is considering and items from the user's wardrobe.
+- **Inputs:** `new_item` (dict), `wardrobe` (dict)
+- **Returns:** A non-empty string containing outfit suggestions.
+- **When it has nothing:** If the wardrobe is empty, returns general styling advice for the new item instead of failing or returning an empty string.
 
 ### `create_fit_card`
 
-- **What it does:**
-- **Inputs:**
-- **Returns:**
-- **When it has nothing:**
+- **What it does:** Creates a short two-to-four sentence caption about the thrifted item and the suggested outfit.
+- **Inputs:** `outfit` (str), `new_item` (dict)
+- **Returns:** A string containing a two-to-four sentence caption.
+- **When it has nothing:** If `outfit` is empty or whitespace, returns a descriptive message instead of raising an error.
 
 ---
 
@@ -84,6 +84,7 @@
 
 <!-- Your branch rule, stated as a rule — the condition AND both paths — plus
      the file and function that holds it.
+
 
      Like this:
        "If search_listings returns an empty list, put a message in the session
@@ -93,14 +94,13 @@
      The grader checks your code against what you claim here, so the file and
      function have to be real. -->
 
-**Branch rule:**
+**Branch rule:** If `search_listings` returns an empty list, store a message in the session and stop. Otherwise, select the first result, pass it to `suggest_outfit`, and then pass the outfit suggestion to `create_fit_card`.
 
 **Where it lives:** `agent.py::run_agent`
 
-**How the query is parsed:** <!-- regex, string splitting, or asking the model — say which -->
+**How the query is parsed:** The model parses the user's query into the description, size, and maximum price needed by `search_listings`.
 
-**What moves through the session:** <!-- which fields, in what order -->
-
+**What moves through the session:** The session stores the search results first, then the selected item, then the outfit suggestion, and finally the fit-card caption.
 ---
 
 ## Sample Run
@@ -121,17 +121,37 @@ $ python app.py ask '...'
 
 ```
 $ python -c "from tools import search_listings; print(search_listings('graphic tee', max_price=30))"
+[{'id': 'lst_002', 'title': 'Y2K Baby Tee — Butterfly Print', 'description': 'Super cute early 2000s baby tee with butterfly graphic. Fitted crop length. Tag says medium but fits like a small.', 'category': 'tops', 'style_tags': ['y2k', 'vintage', 'graphic tee', 'cottagecore'], 'size': 'S/M', 'condition': 'excellent', 'price': 18.0, 'colors': ['white', 'pink', 'purple'], 'brand': None, 'platform': 'depop'}, {'id': 'lst_006', 'title': 'Graphic Tee — 2003 Tour Bootleg Style', 'description': 'Vintage-style bootleg tee with faded graphic. Slightly boxy fit. 100% cotton, soft and worn-in.', 'category': 'tops', 'style_tags': ['graphic tee', 'vintage', 'grunge', 'streetwear', 'band tee'], 'size': 'L', 'condition': 'good', 'price': 24.0, 'colors': ['black'], 'brand': None, 'platform': 'depop'}, {'id': 'lst_017', 'title': 'Mesh Long-Sleeve Top — Black', 'description': 'Sheer black mesh long-sleeve. Great for layering under a graphic tee or over a bralette. Stretchy material, fits true to size.', 'category': 'tops', 'style_tags': ['y2k', 'grunge', 'goth', 'layering'], 'size': 'S/M', 'condition': 'excellent', 'price': 15.0, 'colors': ['black'], 'brand': None, 'platform': 'depop'}, {'id': 'lst_033', 'title': 'Vintage Band Tee — Faded Grey', 'description': 'Faded grey band-style tee with distressed graphic. Crew neck. Fits boxy. Well-loved but no holes or major damage.', 'category': 'tops', 'style_tags': ['vintage', 'grunge', 'band tee', 'graphic tee', 'streetwear'], 'size': 'L', 'condition': 'fair', 'price': 19.0, 'colors': ['grey', 'charcoal'], 'brand': None, 'platform': 'depop'}, {'id': 'lst_011', 'title': 'Low-Rise Cargo Pants — Khaki', 'description': 'Y2K era low-rise cargo pants. Lots of pockets. Khaki color, slightly distressed at the hems. Great for layering with a long tee.', 'category': 'bottoms', 'style_tags': ['y2k', 'cargo', '2000s', 'streetwear'], 'size': 'W29', 'condition': 'fair', 'price': 27.0, 'colors': ['khaki', 'tan'], 'brand': None, 'platform': 'poshmark'}, {'id': 'lst_015', 'title': 'Vintage Graphic Hoodie — Faded Black', 'description': 'Faded black pullover hoodie with barely-visible vintage graphic on the chest. Cozy interior. Some pilling but adds to the worn-in look.', 'category': 'tops', 'style_tags': ['vintage', 'grunge', 'graphic', 'streetwear'], 'size': 'L', 'condition': 'fair', 'price': 26.0, 'colors': ['black', 'charcoal'], 'brand': None, 'platform': 'depop'}]
+
 
 ```
 
 ```
-$ python -c "from tools import suggest_outfit; ..."
+$ python -c "from tools import suggest_outfit; ..."Here are two outfit combinations using the vintage Levi's 501s and pieces already in your wardrobe:
+
+### Outfit 1: Effortless Casual Streetwear
+*Pair the medium-wash denim with a cozy, relaxed top and chunky sneakers for an easy, everyday look.*
+* **Top:** Oversized grey crewneck sweatshirt (`w_004`)
+* **Bottoms:** Vintage Levi's 501 Jeans — Medium Wash (`lst_001`)
+* **Shoes:** Chunky white sneakers (`w_007`)
+* **Accessories:** Black crossbody bag (`w_010`)
+* **Why it works:** The relaxed fit of the oversized grey crewneck contrasts nicely with the straighter, classic cut of the 501s. Finished off with chunky white sneakers, this gives you a classic, effortless off-duty streetwear vibe.
+
+### Outfit 2: Edgy & Cropped Silhouette
+*Play with proportions by pairing a fitted base with a cropped layer and rugged boots.*
+* **Top:** White ribbed tank top (`w_003`) layered under the Black cropped zip hoodie (`w_005`)
+* **Bottoms:** Vintage Levi's 501 Jeans — Medium Wash (`lst_001`)
+* **Shoes:** Black combat boots (`w_008`)
+* **Accessories:** Brown leather belt (`w_009`)
+* **Why it works:** Tucking in the white tank and wearing the black zip hoodie cropped highlights the waist of the 501s. Adding the brown belt and black combat boots brings in a touch of edge while keeping the color palette grounded and versatile.
+
 
 ```
 
 ```
 $ python -c "from tools import create_fit_card; ..."
 
+Nothing beats the effortless 90s vibe of a broken-in pair of Vintage Levi's 501 Jeans with just the right amount of knee fading. Style them with your favorite beat-up sneakers and an oversized tee for the ultimate casual weekend fit. Grab this medium wash staple right now on depop for just $38.0! ✨👖
 ```
 
 ---
@@ -237,12 +257,25 @@ that produced it:
      anyone will ever find that out. -->
 
 **Happy path**
+[1] search_listings
+    in: dict with keys: description, size, max_price
+    out: matching listings
+[2] suggest_outfit
+    in: selected item and wardrobe
+    out: outfit suggestion
+[3] create_fit_card
+    in: outfit suggestion and selected item
+    out: fit card
 
 ```
 
 ```
 
 **Empty search**
+[1] search_listings
+    in: dict with keys: description, size, max_price
+    out: [] (empty)
+    -> branch: no results, stopping
 
 ```
 
@@ -253,7 +286,7 @@ behaved differently afterwards. If the rewire didn't work, say exactly where it
 broke — the error text and the last thing that worked. That earns the point in
 full. -->
 
-
+I kept `search_listings` as a local tool for this milestone. The planning loop now searches listings first, stops early when no results are found, and only calls `suggest_outfit` and `create_fit_card` when a matching item exists.
 
 ---
 

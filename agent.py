@@ -105,10 +105,101 @@ def run_agent(query: str, wardrobe: dict) -> dict:
       • A handler for ModelUnavailable, so a bad key produces a message rather
         than a stack trace. The import is already at the top of this file.
     """
+    trace.start_trace()
     session = new_session(query, wardrobe)
+    count = 1
+    trace.check_iterations(count)
 
-    # TODO: delete these two lines and build the loop.
-    session["error"] = "The planning loop isn't built yet — see the TODO in agent.py."
+    # Parse the query
+    description = query
+    size = None
+    max_price = None
+
+    words = query.split()
+
+    # Find maximum price, e.g. "$30"
+    for word in words:
+        if word.startswith("$"):
+            try:
+                max_price = float(word.replace("$", "").replace(",", ""))
+            except ValueError:
+                pass
+
+    # Find size
+    known_sizes = ["XXS", "XS", "S", "M", "L", "XL", "XXL"]
+    for word in words:
+        cleaned = word.strip(",.!?").upper()
+        if cleaned in known_sizes:
+            size = cleaned
+            break
+
+    session["parsed"] = {
+        "description": description,
+        "size": size,
+        "max_price": max_price,
+    }
+
+    # Search
+    results = search_listings(
+        description=description,
+        size=size,
+        max_price=max_price,
+    )
+
+    trace.step(
+        "search_listings",
+        inputs={
+            "description": description,
+            "size": size,
+            "max_price": max_price,
+        },
+        returned=results,
+    )
+
+    session["search_results"] = results
+
+    # Branch: stop if nothing matched
+    if not results:
+        session["error"] = (
+            "I couldn't find an item matching that request. "
+            "Try changing the description, size, or maximum price."
+        )
+        return session
+
+    # Choose the first/best result
+    session["selected_item"] = results[0]
+
+    try:
+        # Suggest an outfit
+        session["outfit_suggestion"] = suggest_outfit(
+            session["selected_item"],
+            session["wardrobe"],
+        )
+
+        trace.step(
+            "suggest_outfit",
+            inputs={"selected_item": session["selected_item"]},
+            returned=session["outfit_suggestion"],
+        )
+
+        # Create the fit card
+        session["fit_card"] = create_fit_card(
+            session["outfit_suggestion"],
+            session["selected_item"],
+        )
+
+        trace.step(
+            "create_fit_card",
+            inputs={
+                "outfit": session["outfit_suggestion"],
+                "new_item": session["selected_item"],
+            },
+            returned=session["fit_card"],
+        )
+
+    except ModelUnavailable as exc:
+        session["error"] = str(exc)
+
     return session
 
 
