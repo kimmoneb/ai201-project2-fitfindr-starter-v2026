@@ -38,14 +38,14 @@ def _keywords(text: str) -> set[str]:
 
 def _size_tokens(size: str) -> set[str]:
     cleaned = re.sub(r"\([^)]*\)", " ", size or "") # drop parentheticals
-    parts = [p.strip().upper for p in cleaned.split("/")]
+    parts = [p.strip().upper() for p in cleaned.split("/")]
     return {p for p in parts if p}
 
 def _size_matches(wanted: str, listing_size: str) -> bool:
     if not wanted:
         return True
     listing_tokens = _size_tokens(listing_size)
-    if any(token.startswith("ONE SIZE") for token in listing_tokens):
+    if any(size_token.startswith("ONE SIZE") for size_token in listing_tokens):
         return True
     return bool(_size_tokens(wanted) & listing_tokens)
 
