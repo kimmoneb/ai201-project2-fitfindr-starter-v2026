@@ -286,6 +286,23 @@ that produced it:
 ```
 
 ```
+### Milestone 2: Failure Testing
+
+**Test 1 — Empty Search**
+
+I tested a query for an item that was unlikely to exist within the specified budget. The `search_listings` tool returned an empty list, and the agent stopped without calling the remaining tools.
+
+**User-facing message:** "I couldn't find an item matching that request. Try changing the description, size, or maximum price."
+
+**Test 2 — Empty Wardrobe (PASSED)**
+
+I tested the agent using `--empty-wardrobe` to see how it handles missing wardrobe information. The agent successfully completed all three tools and generated two outfit suggestions using general clothing recommendations instead of relying on existing wardrobe items. The trace confirmed two model calls, and the agent completed the task without errors.
+
+**Test 3 — Model Unavailable**
+
+I temporarily modified one character of my API key to simulate an unavailable model. Some initial tests did not reach the model because responses were cached or the search returned no results.
+
+**What I learned:** Testing failure scenarios requires checking the execution trace to confirm that the intended failure was actually triggered.
 
 **Empty search**
 [1] search_listings
