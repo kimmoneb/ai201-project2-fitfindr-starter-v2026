@@ -211,19 +211,95 @@ Nothing beats the effortless 90s vibe of a broken-in pair of Vintage Levi's 501 
      `python run_eval.py --label before` runs everything and writes the table
      into results/. Paste it here and fill in the verdicts. -->
 
+## Unit 4 — Evaluation Run Log
+
+Evaluation command: `python run_eval.py --label before`
+
+Results file: `results/run_2026-10-15_2231_before.md`
+
 | Criterion | Target | Try 1 | Try 2 | Try 3 | Try 4 | Try 5 | Verdict |
 |---|---|---|---|---|---|---|---|
-| 1.  |  |  |  |  |  |  |  |
-| 2.  |  |  |  |  |  |  |  |
-| 3.  |  |  |  |  |  |  |  |
-| 4.  |  |  |  |  |  |  |  |
-| 5.  |  |  |  |  |  |  |  |
+| 1. Matching query completes all three tools | 4/5 | PASS | PASS | PASS | PASS | PASS | MET |
+| 2. Impossible query stops before second tool | 5/5 | PASS | PASS | PASS | PASS | PASS | MET |
+| 3. Selected item remains consistent | 5/5 | PASS | PASS | PASS | PASS | PASS | MET |
+| 4. Fit card includes essential information | 4/5 | PASS | PASS | PASS | PASS | PASS | MET |
+| 5. Empty wardrobe produces styling advice | 4/5 | PASS | PASS | PASS | PASS | PASS | MET |
 
 **Real output from one try**, pasted as text, naming the file and function
 that produced it:
 
+### Criterion 1 — Matching Query
+
+Source: `results/run_2026-10-15_2231_before.md`
+Functions: `run_eval.py::main`, `agent.py::run_agent`
+
+```text
+Query: vintage graphic tee under $30
+stopped early: no
+selected_item: Y2K Baby Tee — Butterfly Print ($18.0, depop)
+search_results: 10
+
+Trace:
+[1] search_listings
+[2] suggest_outfit
+[3] create_fit_card
 ```
 
+### Criterion 2 — Impossible Query
+
+Source: `results/run_2026-10-15_2231_before.md`
+Functions: `run_eval.py::main`, `agent.py::run_agent`
+
+```text
+stopped early: yes — I couldn't find an item matching that request. Try changing the description, size, or maximum price.
+selected_item: (none)
+search_results: 0
+
+Trace:
+[1] search_listings
+     in: dict with keys: description, size, max_price
+     out: [] (empty)
+```
+
+### Criterion 3 — Selected Item Consistency
+
+Source: `results/run_2026-10-15_2231_before.md`
+Functions: `run_eval.py::main`, `agent.py::run_agent`
+
+```text
+selected_item: Y2K Baby Tee — Butterfly Print ($18.0, depop)
+
+[2] suggest_outfit
+     in: dict with keys: selected_item
+     out: Here are two outfit ideas combining the Y2K Butterfly Baby Tee with pieces already in your wardrobe...
+```
+
+### Criterion 4 — Fit Card Information
+
+Source: `results/run_2026-10-15_2231_before.md`
+Functions: `run_eval.py::main`, `agent.py::run_agent`
+
+```text
+Fit card:
+
+Channel your inner 2000s pop star with this adorable Y2K Butterfly Baby Tee, now up on Depop for just $18! Pair it with baggy dark denim and chunky sneakers for the ultimate nostalgic streetwear vibe, or layer it with combat boots for an edgy soft-grunge look. ✨🦋
+```
+
+### Criterion 5 — Empty Wardrobe
+
+Source: `results/run_2026-10-15_2231_before.md`
+Functions: `run_eval.py::main`, `agent.py::run_agent`
+
+```text
+Query: denim jacket under $50
+Wardrobe: empty
+
+stopped early: no
+selected_item: Denim Jacket — Light Wash, Cropped ($42.0, poshmark)
+search_results: 7
+
+Outfit suggestion:
+Since your wardrobe is currently a blank slate, this Wrangler Light Wash Cropped Denim Jacket is actually the ultimate piece to start with.
 ```
 
 ---
@@ -248,14 +324,14 @@ that produced it:
 
 | # | Criterion | Target | Verdict | How I decided |
 |---|---|---|---|---|
-| 1 |  |  |  |  |
-| 2 |  |  |  |  |
-| 3 |  |  |  |  |
-| 4 |  |  |  |  |
-| 5 |  |  |  |  |
+| 1 | Matching query completes all three tools | 4/5 | MET (5/5) | All five runs completed the three tools and generated a fit card. |
+| 2 | Impossible query stops before second tool | 5/5 | MET (5/5) | All five runs stopped after search_listings and returned a message suggesting what to change. |
+| 3 | Selected item remains consistent | 5/5 | MET (5/5) | The selected item was consistently referenced in the outfit suggestions across all five runs. |
+| 4 | Fit card includes essential information | 4/5 | MET (5/5) | All five fit cards included the item's description, price, and selling platform. |
+| 5 | Empty wardrobe produces styling advice | 4/5 | MET (5/5) | All five runs generated styling suggestions despite the wardrobe being empty. |
 
 **Diagnoses**
-
+All five criteria met their targets, so there were no failed criteria to diagnose. However, the trace only displays the input keys for suggest_outfit, rather than the complete selected item. Adding more detailed state tracing would help verify item consistency directly.
 
 
 ---
