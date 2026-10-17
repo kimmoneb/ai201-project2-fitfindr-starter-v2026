@@ -434,7 +434,15 @@ Yes, the evaluation showed that all five criteria met their targets. The matchin
      you did. "I ran out of time" is fine if it's true. Pretending nothing is
      left is not. -->
 
+All five acceptance criteria met their targets during evaluation, so there are no remaining misses against those criteria.
 
+One limitation is that the model-unavailable failure test was not fully verified. Earlier attempts either returned cached responses or stopped at an empty search before reaching the model. A future improvement would be to test this failure with caching disabled and a query that reaches model generation.
+
+I also improved the trace to display the selected item's name, making it easier to verify that the same item is passed between tools.
+
+MCP Migration
+
+I moved search_listings to an MCP server and updated the agent to call it through the MCP client rather than directly. The search behavior remained consistent in the successful tests, while the tool now has a defined schema and can be accessed through MCP.
 
 <!-- ═════════════════════════════════════════════════════════════════════
 
