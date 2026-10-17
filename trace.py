@@ -82,6 +82,8 @@ def _short(value, limit: int = 110) -> str:
         return f"{len(value)} items: {str(head)[:60]}…"
 
     if isinstance(value, dict):
+        if "selected_item_name" in value:
+            return f"selected item: {value['selected_item_name']}"
         if "title" in value:
             return f"{value.get('title')} (${value.get('price')}, {value.get('platform')})"
         keys = ", ".join(list(value)[:6])
